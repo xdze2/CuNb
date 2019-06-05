@@ -1,0 +1,8 @@
+#!/bin/bash
+
+gnome-screenshot -a -c
+
+xclip -out -sel clip -t image/png | base64 > $image
+
+echo $image 
+

@@ -1,0 +1,22 @@
+gnome-screenshot -c -a
+# to clipboard  & area
+
+
+
+xclip -out -sel clip -t image/png | base64 > toto.txt
+
+
+
+https://askubuntu.com/questions/759651/how-to-copy-an-image-to-the-clipboard-from-a-file-using-command-line/759660
+
+
+to base 64:
+
+https://stackoverflow.com/questions/16918602/how-to-base64-encode-image-in-linux-bash-shell
+
+
+xclip -o -t image/png
+
+
+
+https://fernandobasso.github.io/shell/copy-paste-from-command-line-xclip-xsel-clipboard.html

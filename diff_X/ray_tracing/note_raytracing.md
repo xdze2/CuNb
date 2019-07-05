@@ -22,7 +22,8 @@ I(X,Y,Z,phi,psi,omega,2theta) = integrale sur
 - gamma: diffracted direction (+ par exemple diffracted depth)
 
 
-Integration montecarlo: vegas algo
+
+vegas algo
 
 
 rho(x, y, ux, uy, lambda)*Transmission(x, y, ux, uy, lambda, gamma)
@@ -60,36 +61,30 @@ Steps:
 2. through detector?
     2.1 on detector?
     2.i through slits #i
+
+
+
+    
     
 
-## planar_powder
+# Numba
 
-inputs:
-    - A, u, lambda  incident beams
-    - angles, offset, width, height    samples 
-    - d_hkl, gamma   diffraction
-    
-outputs:
-    - B, d   diffracted beams  
-    
-    
-# Parameters
- - Incident beam, source & optique
-     A: beam size --> distribution
-     u: divergence --> distribution
-     lambda: energy --> distribution
- - Sample
-     size: height, width
-     d(hkl) --> distribution / discrete
-     (absorption, grain size, monocristal...)
- - Diffraction
-     gamma (relative to lab. XZ plane) --> distribution
- - Detecteur
-     geometry: slit width and height, offset
- 
-# Gonio movements, scan, measure:
- - sample stage: omega, phi, psi, X, Y, Z
- - detecteur position: 2theta
- 
- 
-I(positions) = integrale()
+no np.matmul in numba
+np.matmul faster than manual implementation
+
+
+
+
+Calibration
+===========
+
+source: w, h profiles, and divergence
+detecteur fente 1/4°
+
+Faisceau direct--> 
+
+
+Exp:
+Source
+
+

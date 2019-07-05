@@ -201,19 +201,31 @@ def slit_detector(A, u, deuxtheta,
     return ~lost_detect, uv_detector
 
 
-def plate_collimator(A, u, angles, offset,
-                     length=96, width=22, height=20,
-                     nbr_plates=39, acceptance=0.27):
+def plate_collim_detector(A, u, deuxtheta,
+                          detector_offset, detector_distance,
+                         length, detector_width, detector_height,
+                         nbr_plates, detector_acceptance):
     '''Plate collimator detector
         
         acceptance in degree, half-angle
         
         origin is defined as center of the front surface
+        
+          'deuxtheta':0, # deux-theta, deg
+    'detector_distance':280, # mm, distance from gonio center to receving slit
+    'detector_offset':0, # mm, offset along Z
+    'length':96, # mm
+    'detector_width':22,
+    'detector_height':20,
+    'nbr_plates':39,
+    'detector_acceptance':0.27 # degree
     '''
-    gap_width = np.tan(acceptance *np.pi/180)*length
-    period = width/(nbr_plates + 1)
+    gap_width = np.tan(detector_acceptance *np.pi/180)*length
+    period = detector_width/(nbr_plates + 1)
     
-    A_prime, u_prime = rt.change_base(A, u, angles, offset)
+    offset = (detector_offset, 0, -detector_distance)
+    angles = (deuxtheta*np.pi/180 + np.pi/2, 0, 0)
+    A_prime, u_prime = change_base(A, u, angles, offset)
 
     time_to_front_plane = -np.divide(A_prime[:, 2], u_prime[:, 2],
                                where=u_prime[:, 2] < 0)
@@ -226,8 +238,8 @@ def plate_collimator(A, u, angles, offset,
 
     #through = time_to_front_plane > 0
     through = np.zeros((A.shape[0],), dtype=bool)
-    for k in range(nbr_lames+1):
-        x_center = -width/2 + k*period + 0.12
+    for k in range(nbr_plates+1):
+        x_center = -detector_width/2 + k*period
         
         through_front = np.abs(front_plane_uv[:, 0]-x_center) < gap_width/2
         through_back =  np.abs(back_plane_uv[:, 0]-x_center) < gap_width/2
@@ -236,6 +248,6 @@ def plate_collimator(A, u, angles, offset,
         through = np.logical_or(through, through_k)
         
     # vertical    
-    through = np.logical_and(through, np.abs(front_plane_uv[:, 1]) < height/2 )
-    through = np.logical_and(through, np.abs(back_plane_uv[:, 1]) < height/2 )
-    return through
+    through = np.logical_and(through, np.abs(front_plane_uv[:, 1]) < detector_height/2 )
+    through = np.logical_and(through, np.abs(back_plane_uv[:, 1]) < detector_height/2 )
+    return through, front_plane_uv

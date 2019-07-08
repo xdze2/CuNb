@@ -319,3 +319,28 @@ def plate_collim_detector(A, u, deuxtheta,
     through = np.logical_and(through, np.abs(front_plane_uv[:, 1]) < height/2 )
     through = np.logical_and(through, np.abs(back_plane_uv[:, 1]) < height/2 )
     return through, front_plane_uv
+
+
+
+
+
+
+    def plot_rectangle(uv, color=None, rectangle_size=None, title='rectangle'):
+        color = np.zeros(uv.shape[0], dtype=bool) if color is None else color
+        
+        plt.plot(uv[color==0, 0], uv[color==0, 1], ',k', alpha=0.5) # outside
+        plt.plot(uv[color==1, 0], uv[color==1, 1], ',r', alpha=0.6) # insed
+        plt.plot(uv[color==2, 0], uv[color==2, 1], ',m', alpha=0.8) # insed
+        
+        if rectangle_size:
+            width, height = rectangle_size
+            plt.plot([-width/2, width/2, width/2, -width/2, -width/2],
+                    [-height/2, -height/2, height/2, height/2, -height/2], '-',
+                    color='black', linewidth=1);
+        else:
+            plt.axvline(x=0, linewidth=1, color='black')
+            plt.axhline(y=0, linewidth=1, color='black')
+        #plt.axis('equal');
+        plt.xlabel('u (mm)'); plt.ylabel('v (mm)')
+        plt.title(title);
+    

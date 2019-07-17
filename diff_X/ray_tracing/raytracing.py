@@ -85,16 +85,18 @@ def rectangle_intersection(A, u, angles, offset, width, height):
 
 
 def normalize(array_of_vector):
-    """ Normalize the given array of vectors.
+    """
+    Normalize the given array of vectors.
 
-        Parameters
-        ----------
-        array_of_vector : (N, dim) array
-            vector along the last dim
+    Parameters
+    ----------
+    array_of_vector : (N, dim) array
+        Vector along the last dim
 
-        Returns
-        -------
-        y : array (N, dim)
+    Returns
+    -------
+    y : array (N, dim)
+
     """
     array_of_vector = np.asarray(array_of_vector)
     norm = np.linalg.norm(array_of_vector, axis=-1, keepdims=True)
@@ -102,70 +104,98 @@ def normalize(array_of_vector):
     return np.divide(array_of_vector, norm, where=norm > 0)
 
 
-def source(N, source_width, source_height,
-           divergence_z, divergence_y, source_position):
-    """Generate rays from a rectangular source 
-    
+# Elements and optics
+
+def source(N, width, height,
+           divergence_z, divergence_y, position):
+    """
+    Generate random rays from a rectangular source 
+    with gaussian distributed divergence
+
     Parameters
     ----------
-    N: number of generated rays
-    width, height: dimension of the rectangular source, in mm
-    divergence_z, divergence_y: degree, angle of beam divergence (std of gaussian distribution)
-    source_position: source position along global X axis
+    N : integer
+        Number of generated rays
+    width, height : floats [mm]
+        dimension of the rectangular source, in mm
+    divergence_z, divergence_y : floats [degree]
+        Angle of beam divergence
+        (i.e. standard diviation of a gaussian distribution)
+    position : float [mm]
+        Source position along global X axis
     
     Returns
     -------
-    A, u: position and direction (N, 3) arrays
+    A, u : (N, 3) float arrays
+        Position and direction of rays
+
     """
         
     # Directions:
     ux = -np.ones((N, 1))
-    uy = np.random.randn(N, 1)* divergence_y*np.pi/180
-    uz = np.random.randn(N, 1)* divergence_z*np.pi/180
+    uy = np.random.randn(N, 1)* divergence_y *np.pi/180
+    uz = np.random.randn(N, 1)* divergence_z *np.pi/180
     u = np.hstack([ux, uy, uz])
     u = normalize(u)
     
     # Beam shape
-    Ax = np.ones((N, 1)) * source_position
-    A_height = (np.random.rand(N, 1) - 0.5) * source_height  # mm, square, along Y
-    A_width = (np.random.rand(N, 1) - 0.5) * source_width  # mm, square, along Z
+    Ax = np.ones((N, 1)) * position
+    A_height = (np.random.rand(N, 1) - 0.5) * height  # mm, square, along Y
+    A_width = (np.random.rand(N, 1) - 0.5) * width  # mm, square, along Z
     A = np.hstack([Ax, A_height, A_width])
 
     return A, u
 
 
-# Diffracted directions
 def planar_powder(A, u,
-                  omega, psi, phi, X, Y, Z, sample_width, sample_height,
+                  omega, psi, phi, X, Y, Z,
+                  width, height,
                   gamma_range, deuxtheta_diff):
-    '''Diffraction by a perfect planar powder
+    """
+    Diffraction by a perfect planar powder
         
     Parameters
     ----------
-    A, u: (N, dim) array
-        incident rays
-    omega, psi, phi: floats
-        sample holder orientation (degree)
-    X, Y, Z: floats
-        sample holder position (mm)
-    sample_width, sample_height: floats
-        dimension of the rectangular sample
-    gamma_range: float (degree)
-        max-min out of plane diffracted angle
-    deuxtheta_diff: float
-        diffracted angle (Bragg's law) (degree)
-    '''
+    A, u : (N, 3) arrays
+        Incident rays
+    omega, psi, phi: floats [degree]
+        Sample holder orientation
+    X, Y, Z : floats [mm]
+        Sample holder position
+    width, height: floats [mm]
+        Dimension of the rectangular sample
+    gamma_range : float [degree]
+        Max-min out-of-plane diffracted angle
+        Angles are generated using uniform random distribution
+    deuxtheta_diff : float 
+        Diffracted angle (Bragg's law)
+
+    Returns
+    -------
+    B, d : (N, 3) arrays
+        Diffrated rays
+    through : (N, ) boolean array
+        True if the ray was inside the sample
+    uv : (N, 2) float array
+        Intersection points in the sample plane 
+
+    Notes
+    -----
+    The orientation for gamma=0 is defined as perpendicular
+    to the vertical direction (0, 1, 0) and righ-handed rotation with u
+
+    """
     deuxtheta = np.pi/180 * deuxtheta_diff
     N = np.shape(A)[0]
-    gamma = gamma_range * np.pi/180*(np.random.rand(N,) - 0.5)
+    gamma = gamma_range*(np.random.rand(N,) - 0.5) *np.pi/180
     
     # Intersection with the sample
     angles = np.pi/180 * np.array([omega, psi, phi])
     offset = np.array([X, Y, Z])
-    mask, uv, B = rectangle_intersection(A, u,
-                                         angles, offset, sample_width, sample_height)
+    lost, uv, B = rectangle_intersection(A, u,
+                                         angles, offset, width, height)
 
-    
+    through = ~lost
     # Diffracted cone
     ref_plane_normal = np.array((.0, 1., .0))
 
@@ -180,50 +210,88 @@ def planar_powder(A, u,
     d = u*np.cos(deuxtheta) + np.sin(deuxtheta)*(gamma_zero*np.cos(gamma)[:, np.newaxis] + \
                                gamma_90*np.sin(gamma)[:, np.newaxis])
     
-    return B, d, mask, uv
+    return B, d, through, uv
 
 
 def slit_detector(A, u, deuxtheta,
-                  detector_distance, detector_offset, detector_slit_angle,
-                  slit_conversion_distance, detector_height):
-    """ Simple slit detector
+                  distance, offset,
+                  width, height):
     """
-    width = slit_conversion_distance*detector_slit_angle *np.pi/180 # mm
-    height = detector_height
+    Simple slit detector
+    
+    Parameters
+    ----------
+    A, u : (N, 3) arrays
+        Incident rays
+    deuxtheta : float [degree]
+        Angular position of the detector
+    distance : float [mm]
+        Distance from gonio center to the detector plane
+    offset : float [mm]
+        Position of the slit center relative to the detector position
+    width, height : floats [mm]
+        Dimensions of the receveing slit
+
+    Returns
+    -------
+    through : (N, ) boolean array
+        True if ray is detected (i.e. go through the slit)
+    uv_detector : (N, 2) float array
+        Intersection points in the detector plane 
+
+    """
+
 
     angles = (deuxtheta*np.pi/180 + np.pi/2, 0, 0) # i.e. omega, phi, psi
-    offset = (detector_offset, 0, -detector_distance)
+    offset = (offset, 0, -distance)
 
-    lost_detect, uv_detector, C = rectangle_intersection(A, u,
+    lost_detect, uv_detector, _ = rectangle_intersection(A, u,
                                                          angles, offset,
                                                          width, height)
-
-    return ~lost_detect, uv_detector
+    through = ~lost_detect
+    return through, uv_detector
 
 
 def plate_collim_detector(A, u, deuxtheta,
-                          detector_offset, detector_distance,
-                         length, detector_width, detector_height,
-                         nbr_plates, detector_acceptance):
-    '''Plate collimator detector
+                          distance, offset,
+                          width, height,
+                          length, nbr_plates, acceptance):
+    """
+    Plate collimator detector
+
+    Parameters
+    ----------
+    A, u : (N, 3) arrays
+        Incident rays
+    deuxtheta : float [degree]
+        Angular position of the detector
+    distance : float [mm]
+        Distance from gonio center to the detector front plane
+    offset : float [mm]
+        Position of the slit center relative to the detector position
+    width, height : floats [mm]
+        Overall dimensions of the receveing slit
+    length : float [mm]
+        Length of the plates
+    nbr_plates : integer
+        number of plates, used to estimate the thickness of the plates
+    acceptance : float [degree]
+        half-angle
+        used to estimate the gap between the plates
+        tan( acceptance ) = gap/length
         
-        acceptance in degree, half-angle
-        
-        origin is defined as center of the front surface
-        
-          'deuxtheta':0, # deux-theta, deg
-    'detector_distance':280, # mm, distance from gonio center to receving slit
-    'detector_offset':0, # mm, offset along Z
-    'length':96, # mm
-    'detector_width':22,
-    'detector_height':20,
-    'nbr_plates':39,
-    'detector_acceptance':0.27 # degree
-    '''
-    gap_width = np.tan(detector_acceptance *np.pi/180)*length
-    period = detector_width/(nbr_plates + 1)
+    Returns
+    -------
+    through : (N, ) boolean array
+        True if ray is detected (i.e. go through the slit)
+    uv_detector : (N, 2) float array
+        Intersection points in the detector plane 
+
+    """
+    gap_width = np.tan(acceptance *np.pi/180)*length
+    period = width/(nbr_plates + 1)
     
-    offset = (detector_offset, 0, -detector_distance)
+    offset = (offset, 0, -distance)
     angles = (deuxtheta*np.pi/180 + np.pi/2, 0, 0)
     A_prime, u_prime = change_base(A, u, angles, offset)
 
@@ -239,7 +307,7 @@ def plate_collim_detector(A, u, deuxtheta,
     #through = time_to_front_plane > 0
     through = np.zeros((A.shape[0],), dtype=bool)
     for k in range(nbr_plates+1):
-        x_center = -detector_width/2 + k*period
+        x_center = -width/2 + k*period
         
         through_front = np.abs(front_plane_uv[:, 0]-x_center) < gap_width/2
         through_back =  np.abs(back_plane_uv[:, 0]-x_center) < gap_width/2
@@ -248,6 +316,31 @@ def plate_collim_detector(A, u, deuxtheta,
         through = np.logical_or(through, through_k)
         
     # vertical    
-    through = np.logical_and(through, np.abs(front_plane_uv[:, 1]) < detector_height/2 )
-    through = np.logical_and(through, np.abs(back_plane_uv[:, 1]) < detector_height/2 )
+    through = np.logical_and(through, np.abs(front_plane_uv[:, 1]) < height/2 )
+    through = np.logical_and(through, np.abs(back_plane_uv[:, 1]) < height/2 )
     return through, front_plane_uv
+
+
+
+
+
+
+    def plot_rectangle(uv, color=None, rectangle_size=None, title='rectangle'):
+        color = np.zeros(uv.shape[0], dtype=bool) if color is None else color
+        
+        plt.plot(uv[color==0, 0], uv[color==0, 1], ',k', alpha=0.5) # outside
+        plt.plot(uv[color==1, 0], uv[color==1, 1], ',r', alpha=0.6) # insed
+        plt.plot(uv[color==2, 0], uv[color==2, 1], ',m', alpha=0.8) # insed
+        
+        if rectangle_size:
+            width, height = rectangle_size
+            plt.plot([-width/2, width/2, width/2, -width/2, -width/2],
+                    [-height/2, -height/2, height/2, height/2, -height/2], '-',
+                    color='black', linewidth=1);
+        else:
+            plt.axvline(x=0, linewidth=1, color='black')
+            plt.axhline(y=0, linewidth=1, color='black')
+        #plt.axis('equal');
+        plt.xlabel('u (mm)'); plt.ylabel('v (mm)')
+        plt.title(title);
+    

@@ -88,3 +88,37 @@ Exp:
 Source
 
 
+
+
+
+# Plot
+
+https://stackoverflow.com/questions/42639129/is-matplotlib-scatter-plot-slow-for-large-number-of-data
+
+
+
+
+# diffract
+
+    # Parameters
+     - Incident beam, source & optique
+         A: beam size --> distribution
+         u: divergence --> distribution
+         lambda: energy --> distribution
+     - Sample (perfect powder)
+         size: height, width
+         d(hkl) --> distribution / discrete
+         (absorption, grain size, monocristal...)
+     - Diffraction
+         gamma (relative to lab. XZ plane) --> distribution
+     - Detecteur
+         geometry: slit width and height, offset
+
+    # Gonio movements, scan, measure:
+     - sample stage: omega, phi, psi, X, Y, Z
+     - detecteur position: 2theta
+     
+     # Variables
+
+- x, y, source
+     - 

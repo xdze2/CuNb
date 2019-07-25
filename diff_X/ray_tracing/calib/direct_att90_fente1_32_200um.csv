@@ -1,0 +1,106 @@
+[Measurement conditions]
+Sample identification,
+Comment - 1,"Configuration=2018HybrideTripleAxis, Owner=User-1, Creation date=19/10/2018 14:17:25"
+Comment - 2,"Goniometer=PW3050/20 HR  (Theta/2Theta); Minimum step size 2Theta:0.001; Minimum step size Omega:0.001"
+Comment - 3,"Sample stage=MRD Cradle; Minimum step size Phi:0.01; Minimum step size Psi:0.01; Minimum step size X:0.01; Minimum step size Y:0.01; Minimum step size Z:0.001"
+Comment - 4,"Diffractometer system=XPERT-MPD"
+Comment - 5,"Measurement program=Manual, Owner=stephanie, Creation date=04/07/2019 14:15:25"
+Comment - 6,"Fine Calibration Offset for 2Theta = 2.919 deg"
+Comment - 7,"Fine Calibration Offset for Omega = 2.880 deg"
+Anode material,Cu
+K-Alpha1 wavelength,1.5405980
+K-Alpha2 wavelength,1.5444260
+Ratio K-Alpha2/K-Alpha1,0.000
+Monochromator used,YES
+Generator voltage, 40
+Tube current, 30
+File date and time,04/juil./2019 14:53
+Unit cell,
+h k l, 0 0 0
+Scan axis,2Theta
+Scan range,0.16300,0.52800
+Scan step size,0.0050000
+No. of points, 73
+Scan type,CONTINUOUS
+Omega,0.250
+Phi,0.00
+Psi,0.00
+X,-2.11
+Y,0.00
+Z,0.000
+Time per step,0.50
+[Scan points]
+Angle,Intensity
+0.16550,0.0
+0.17050,0.0
+0.17550,0.0
+0.18050,1.0
+0.18550,1.0
+0.19050,1.0
+0.19550,1.0
+0.20050,1.0
+0.20550,1.0
+0.21050,2.0
+0.21550,0.0
+0.22050,1.0
+0.22550,1.0
+0.23050,2.0
+0.23550,1.0
+0.24050,4.0
+0.24550,4.0
+0.25050,1.0
+0.25550,2.0
+0.26050,4.0
+0.26550,5.0
+0.27050,5.0
+0.27550,6.0
+0.28050,5.0
+0.28550,8.0
+0.29050,5.0
+0.29550,11.0
+0.30050,19.0
+0.30550,72.0
+0.31050,183.0
+0.31550,631.0
+0.32050,1601.0
+0.32550,3299.0
+0.33050,5597.0
+0.33550,8444.0
+0.34050,10620.0
+0.34550,12203.0
+0.35050,12111.0
+0.35550,10970.0
+0.36050,8425.0
+0.36550,5854.0
+0.37050,3046.0
+0.37550,1246.0
+0.38050,438.0
+0.38550,203.0
+0.39050,80.0
+0.39550,31.0
+0.40050,17.0
+0.40550,5.0
+0.41050,3.0
+0.41550,2.0
+0.42050,3.0
+0.42550,1.0
+0.43050,1.0
+0.43550,4.0
+0.44050,1.0
+0.44550,1.0
+0.45050,0.0
+0.45550,0.0
+0.46050,3.0
+0.46550,0.0
+0.47050,3.0
+0.47550,2.0
+0.48050,1.0
+0.48550,0.0
+0.49050,1.0
+0.49550,0.0
+0.50050,0.0
+0.50550,0.0
+0.51050,2.0
+0.51550,2.0
+0.52050,2.0
+0.52550,1.0
